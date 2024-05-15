@@ -61,11 +61,14 @@ func (t *DNSValidationTask) NewURLValidationTask(link string, value string) (*as
 func (t *DNSValidationTask) HandleDNSValidationTask(ctx context.Context, task *asynq.Task) error {
 	log.Printf("Processing task: %s, payload: %s", task.Type(), task.Payload())
 	var payload DNSValidationPayload
-	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
-		return fmt.Errorf("payload json unmarshal failed: %v: %w", err, asynq.SkipRetry)
-	}
-
 	res := TaskResultPayload{}
+
+	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
+		result := TaskResultPayload{}.New(false, "payload json unmarshal failed", err.Error())
+		payloadBytes, _ := result.ToJson()
+		_, _ = task.ResultWriter().Write(payloadBytes)
+		return fmt.Errorf("%v : %w", string(payloadBytes), asynq.SkipRetry)
+	}
 
 	isvalid, err := _validator.ValidateOwnershipOverDNSTxtRecord(payload.Link, t.TXTRecordName, payload.Value)
 	res.IsValid = isvalid
@@ -75,9 +78,18 @@ func (t *DNSValidationTask) HandleDNSValidationTask(ctx context.Context, task *a
 		res.Error = &errorStr
 
 		if err.Error() == validator.CheckErrorMessages[validator.ErrDNSNameValueNull] {
-			return fmt.Errorf("error validating payload %v: %w", err, asynq.SkipRetry)
+
+			result := res.New(isvalid, "error validating payload", errorStr)
+			payloadBytes, _ := result.ToJson()
+			_, _ = task.ResultWriter().Write(payloadBytes)
+
+			return fmt.Errorf("%v: %w", string(payloadBytes), asynq.SkipRetry)
 		} else {
-			return fmt.Errorf("error validating ownership over DNS TXT record: %v", errorStr)
+			result := res.New(isvalid, "error validating ownership over DNS TXT record", errorStr)
+			payloadBytes, _ := result.ToJson()
+			_, _ = task.ResultWriter().Write(payloadBytes)
+
+			return fmt.Errorf("%v", string(payloadBytes))
 		}
 	}
 

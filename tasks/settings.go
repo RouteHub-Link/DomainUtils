@@ -39,7 +39,19 @@ type InfoPayload struct {
 
 type TaskResultPayload struct {
 	IsValid bool    `json:"isValid"`
+	Message *string `json:"message,omitempty"`
 	Error   *string `json:"error,omitempty"`
+}
+
+func (p TaskResultPayload) New(isValid bool, message string, err string) *TaskResultPayload {
+	_message := &message
+	_err := &err
+
+	return &TaskResultPayload{
+		IsValid: isValid,
+		Message: _message,
+		Error:   _err,
+	}
 }
 
 func (p TaskResultPayload) ToJson() ([]byte, error) {

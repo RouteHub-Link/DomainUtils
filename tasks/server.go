@@ -2,11 +2,27 @@ package tasks
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/hibiken/asynq"
+	"github.com/hibiken/asynqmon"
 )
 
-func Serve(redisAddr string) {
+type TaskServer struct {
+	RedisAddr      string
+	MonitoringPath string
+	MonitoringPort string
+}
+
+func (t TaskServer) NewInspector() *asynq.Inspector {
+	return asynq.NewInspector(asynq.RedisClientOpt{Addr: t.RedisAddr})
+}
+
+func (t TaskServer) NewClient() *asynq.Client {
+	return asynq.NewClient(asynq.RedisClientOpt{Addr: t.RedisAddr})
+}
+
+func (t TaskServer) Serve() {
 	URLValidationTask := NewURLValidationTaskWithDefaults()
 	DNSValidationTask := NewDNSValidationTaskWithDefaults()
 
@@ -20,7 +36,7 @@ func Serve(redisAddr string) {
 	asynqQueue[DNSValidationTask.Settings.Queue] = DNSValidationTask.Settings.QueuePriority
 
 	srv := asynq.NewServer(
-		asynq.RedisClientOpt{Addr: redisAddr},
+		asynq.RedisClientOpt{Addr: t.RedisAddr},
 		asynq.Config{
 			Concurrency: 10,
 			Queues:      asynqQueue,
@@ -35,4 +51,18 @@ func Serve(redisAddr string) {
 	if err := srv.Run(mux); err != nil {
 		log.Fatalf("could not run server: %v", err)
 	}
+}
+
+func (t TaskServer) AsynqmonServe() {
+	h := asynqmon.New(asynqmon.Options{
+		RootPath:     t.MonitoringPath, // RootPath specifies the root for asynqmon app
+		RedisConnOpt: asynq.RedisClientOpt{Addr: t.RedisAddr},
+	})
+
+	// Note: We need the tailing slash when using net/http.ServeMux.
+	http.Handle(h.RootPath()+"/", h)
+	println("Monitoring server is running link: http://localhost:" + t.MonitoringPort + t.MonitoringPath)
+
+	// Go to http://localhost:8080/monitoring to see asynqmon homepage.
+	log.Fatal(http.ListenAndServe(":"+t.MonitoringPort, nil))
 }
