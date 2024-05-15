@@ -54,19 +54,20 @@ func (t *URLValidationTask) NewURLValidationTask(link string) (*asynq.Task, erro
 
 func (t *URLValidationTask) HandleURLValidationTask(ctx context.Context, task *asynq.Task) error {
 	log.Printf("Processing task: %s, payload: %s", task.Type(), task.Payload())
+	URLTaskResultPayload := TaskResultPayload{
+		IsValid: false,
+	}
 
 	var payload URLValidationPayload
 	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
-		return fmt.Errorf("payload json unmarshal failed: %v: %w", err, asynq.SkipRetry)
+		res := TaskResultPayload{}.New(false, "payload json unmarshal failed", err.Error())
+		payloadJson, _ := res.ToJson()
 
+		return fmt.Errorf("%v: %w", string(payloadJson), asynq.SkipRetry)
 	}
 
 	isValid, err := _validator.ValidateURL(payload.Link)
-	URLTaskResultPayload := TaskResultPayload{
-		IsValid: isValid,
-	}
-
-	log.Printf("\nValidation result: %v \n Err : %v", URLTaskResultPayload, err)
+	URLTaskResultPayload.IsValid = isValid
 
 	if err != nil {
 		if ce, ok := err.(*validator.CheckError); ok {
@@ -77,12 +78,10 @@ func (t *URLValidationTask) HandleURLValidationTask(ctx context.Context, task *a
 				return err
 			}
 
-			URLTaskResultPayload.Error = &errMsg
-			payloadJson, _ := URLTaskResultPayload.ToJson()
+			res := TaskResultPayload{}.New(false, "URL validation failed", errMsg)
+			payloadJson, _ := res.ToJson()
 
-			_, _ = task.ResultWriter().Write(payloadJson)
-
-			return fmt.Errorf("validation failed: %v: %w", err, asynq.SkipRetry)
+			return fmt.Errorf("%v: %w", string(payloadJson), asynq.SkipRetry)
 		} else {
 			return err
 		}

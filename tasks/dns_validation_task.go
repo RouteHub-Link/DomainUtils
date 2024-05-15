@@ -66,7 +66,6 @@ func (t *DNSValidationTask) HandleDNSValidationTask(ctx context.Context, task *a
 	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
 		result := TaskResultPayload{}.New(false, "payload json unmarshal failed", err.Error())
 		payloadBytes, _ := result.ToJson()
-		_, _ = task.ResultWriter().Write(payloadBytes)
 		return fmt.Errorf("%v : %w", string(payloadBytes), asynq.SkipRetry)
 	}
 
@@ -81,13 +80,11 @@ func (t *DNSValidationTask) HandleDNSValidationTask(ctx context.Context, task *a
 
 			result := res.New(isvalid, "error validating payload", errorStr)
 			payloadBytes, _ := result.ToJson()
-			_, _ = task.ResultWriter().Write(payloadBytes)
 
 			return fmt.Errorf("%v: %w", string(payloadBytes), asynq.SkipRetry)
 		} else {
 			result := res.New(isvalid, "error validating ownership over DNS TXT record", errorStr)
 			payloadBytes, _ := result.ToJson()
-			_, _ = task.ResultWriter().Write(payloadBytes)
 
 			return fmt.Errorf("%v", string(payloadBytes))
 		}
