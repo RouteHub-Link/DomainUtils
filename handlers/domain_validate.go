@@ -8,8 +8,7 @@ import (
 )
 
 type DomainValidationHandlers struct {
-	TaskServer        *tasks.TaskServer
-	URLValidationTask *tasks.URLValidationTask
+	TaskServer *tasks.TaskServer
 }
 
 func (dvh DomainValidationHandlers) BindHandlers(e *echo.Echo) {
@@ -26,7 +25,7 @@ func (dvh DomainValidationHandlers) HandlePostValidateURL(c echo.Context) error 
 		return err
 	}
 
-	task, err := dvh.URLValidationTask.NewURLValidationTask(validationPaylod.Link)
+	task, err := dvh.TaskServer.URLValidationTask.NewURLValidationTask(validationPaylod.Link)
 	if err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func (dvh DomainValidationHandlers) HandleGetValidateURL(c echo.Context) error {
 
 	infoPayload.ID = id
 
-	taskInfo, err := inspector.GetTaskInfo(dvh.URLValidationTask.Settings.Queue, infoPayload.ID)
+	taskInfo, err := inspector.GetTaskInfo(dvh.TaskServer.URLValidationTask.Settings.Queue, infoPayload.ID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}

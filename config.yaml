@@ -1,0 +1,26 @@
+validator:
+  max_redirects: 10
+  max_size: 4194304
+  max_url_length: 2048
+  check_for_file: true
+  check_is_reachable: true
+  cannot_end_with_slash: true
+  https_required: true
+  content_type_must_be_html: true
+task_server:
+  redis_addr: 127.0.0.1:6379
+  monitoring_path: /monitoring
+  monitoring_port: 8081
+  concurrency: 10
+tasks:
+  dns_validation_task:
+    task_name: "dns:validate"
+    task_queue: "dns_validation_queue"
+    task_priority: 4
+    dns_txt_record: "routehub_domainkey"
+  url_validation_task:
+    task_name: "url:validate"
+    task_queue: "url_validation_queue"
+    task_priority: 4
+Port: 1235
+Health: true

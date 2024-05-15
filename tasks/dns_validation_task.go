@@ -11,16 +11,23 @@ import (
 	"github.com/hibiken/asynq"
 )
 
-const (
-	TaskTypeDNSValidate          = "dns:validate"
-	TaskTypeDNSValidateTXTRecord = "routehub_domainkey"
-	TaskTypeDNSValidateQueue     = "dns-validation"
-	TaskTypeDNSValidatePriority  = 4
-)
+type DNSValidationTaskConfig struct {
+	TaskName     string `koanf:"task_name"`
+	DNSTXTRecord string `koanf:"dns_txt_record"`
+	TaskQueue    string `koanf:"task_queue"`
+	TaskPriority int    `koanf:"task_priority"`
+}
+
+var DefaultDNSValidationTaskConfig = DNSValidationTaskConfig{
+	TaskName:     "dns:validate",
+	DNSTXTRecord: "routehub_domainkey",
+	TaskQueue:    "dns-validation",
+	TaskPriority: 4,
+}
 
 type DNSValidationTask struct {
-	Settings      Settings
-	TXTRecordName string
+	Settings   Settings
+	TaskConfig DNSValidationTaskConfig
 }
 
 type DNSValidationPayload struct {
@@ -28,18 +35,29 @@ type DNSValidationPayload struct {
 	Value string `json:"value"`
 }
 
-func NewDNSValidationTask(settings Settings) *DNSValidationTask {
+func NewDNSValidationTask(settings Settings, DNSValidationTaskConfig DNSValidationTaskConfig) *DNSValidationTask {
 	return &DNSValidationTask{
-		Settings:      settings,
-		TXTRecordName: TaskTypeDNSValidateTXTRecord,
+		Settings:   settings,
+		TaskConfig: DNSValidationTaskConfig,
 	}
 }
 
 func NewDNSValidationTaskWithDefaults() *DNSValidationTask {
 	return &DNSValidationTask{
-		Settings:      DefaultSettings(TaskTypeDNSValidateQueue, TaskTypeDNSValidatePriority),
-		TXTRecordName: TaskTypeDNSValidateTXTRecord,
+		Settings:   DefaultSettings(DefaultDNSValidationTaskConfig.TaskQueue, DefaultDNSValidationTaskConfig.TaskPriority),
+		TaskConfig: DefaultDNSValidationTaskConfig,
 	}
+}
+
+func NewDNSValidationTaskWithConfig(config DNSValidationTaskConfig) *DNSValidationTask {
+	return &DNSValidationTask{
+		Settings:   DefaultSettings(config.TaskQueue, config.TaskPriority),
+		TaskConfig: config,
+	}
+}
+
+func (t *DNSValidationTask) SetTaskConfig(DNSValidationTaskConfig DNSValidationTaskConfig) {
+	t.TaskConfig = DNSValidationTaskConfig
 }
 
 func (t *DNSValidationTask) NewURLValidationTask(link string, value string) (*asynq.Task, error) {
@@ -48,7 +66,7 @@ func (t *DNSValidationTask) NewURLValidationTask(link string, value string) (*as
 		Value: value,
 	})
 
-	return asynq.NewTask(TaskTypeDNSValidate,
+	return asynq.NewTask(t.TaskConfig.TaskName,
 		payload,
 		asynq.MaxRetry(t.Settings.MaxRetry),
 		asynq.Timeout(t.Settings.Timeout),
@@ -69,7 +87,7 @@ func (t *DNSValidationTask) HandleDNSValidationTask(ctx context.Context, task *a
 		return fmt.Errorf("%v : %w", string(payloadBytes), asynq.SkipRetry)
 	}
 
-	isvalid, err := _validator.ValidateOwnershipOverDNSTxtRecord(payload.Link, t.TXTRecordName, payload.Value)
+	isvalid, err := _validator.ValidateOwnershipOverDNSTxtRecord(payload.Link, t.TaskConfig.DNSTXTRecord, payload.Value)
 	res.IsValid = isvalid
 
 	if err != nil {

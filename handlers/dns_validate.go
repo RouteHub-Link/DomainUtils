@@ -8,8 +8,7 @@ import (
 )
 
 type DNSValidationHandlers struct {
-	TaskServer        *tasks.TaskServer
-	DNSValidationTask *tasks.DNSValidationTask
+	TaskServer *tasks.TaskServer
 }
 
 func (dvh DNSValidationHandlers) HandlePostValidateDNS(c echo.Context) error {
@@ -21,7 +20,7 @@ func (dvh DNSValidationHandlers) HandlePostValidateDNS(c echo.Context) error {
 		return err
 	}
 
-	task, err := dvh.DNSValidationTask.NewURLValidationTask(validationPaylod.Link, validationPaylod.Value)
+	task, err := dvh.TaskServer.DNSValidationTask.NewURLValidationTask(validationPaylod.Link, validationPaylod.Value)
 	if err != nil {
 		return err
 	}
@@ -48,7 +47,7 @@ func (dvh DNSValidationHandlers) HandleGetValidateDNS(c echo.Context) error {
 
 	infoPayload.ID = id
 
-	taskInfo, err := inspector.GetTaskInfo(dvh.DNSValidationTask.Settings.Queue, infoPayload.ID)
+	taskInfo, err := inspector.GetTaskInfo(dvh.TaskServer.DNSValidationTask.Settings.Queue, infoPayload.ID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}

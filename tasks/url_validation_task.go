@@ -11,14 +11,21 @@ import (
 	"github.com/hibiken/asynq"
 )
 
-const (
-	TaskTypeURLValidate              = "url:validate"
-	TaskTypeURLValidateQueue         = "url-validation"
-	TaskTypeURLValidateQueuePriority = 3
-)
+type URLValidationTaskConfig struct {
+	TaskName     string `koanf:"task_name"`
+	TaskQueue    string `koanf:"task_queue"`
+	TaskPriority int    `koanf:"task_priority"`
+}
+
+var DefaultURLValidationTaskConfig = URLValidationTaskConfig{
+	TaskName:     "url:validate",
+	TaskQueue:    "url-validation",
+	TaskPriority: 3,
+}
 
 type URLValidationTask struct {
-	Settings Settings
+	Settings   Settings
+	TaskConfig URLValidationTaskConfig
 }
 
 type URLValidationPayload struct {
@@ -33,7 +40,15 @@ func NewURLValidationTask(settings Settings) *URLValidationTask {
 
 func NewURLValidationTaskWithDefaults() *URLValidationTask {
 	return &URLValidationTask{
-		Settings: DefaultSettings(TaskTypeURLValidateQueue, TaskTypeURLValidateQueuePriority),
+		Settings:   DefaultSettings(DefaultDNSValidationTaskConfig.TaskQueue, DefaultDNSValidationTaskConfig.TaskPriority),
+		TaskConfig: DefaultURLValidationTaskConfig,
+	}
+}
+
+func NewURLValidationTaskWithConfig(config URLValidationTaskConfig) *URLValidationTask {
+	return &URLValidationTask{
+		Settings:   DefaultSettings(config.TaskQueue, config.TaskPriority),
+		TaskConfig: config,
 	}
 }
 
@@ -42,7 +57,7 @@ func (t *URLValidationTask) NewURLValidationTask(link string) (*asynq.Task, erro
 		Link: link,
 	})
 
-	return asynq.NewTask(TaskTypeURLValidate,
+	return asynq.NewTask(t.TaskConfig.TaskName,
 		payload,
 		asynq.MaxRetry(t.Settings.MaxRetry),
 		asynq.Timeout(t.Settings.Timeout),

@@ -10,9 +10,15 @@ import (
 )
 
 var (
-	taskServer        = tasks.TaskServer{RedisAddr: "127.0.0.1:6379", MonitoringPath: "/monitoring", MonitoringPort: "8080"}
-	URLValidationTask = tasks.NewURLValidationTaskWithDefaults()
-	DNSValidationTask = tasks.NewDNSValidationTaskWithDefaults()
+	_applicationConfig = GetApplicationConfig()
+	URLValidationTask  = tasks.NewURLValidationTaskWithConfig(_applicationConfig.TaskConfigs.URLValidationTaskConfig)
+	DNSValidationTask  = tasks.NewDNSValidationTaskWithConfig(_applicationConfig.TaskConfigs.DNSValidationTaskConfig)
+
+	taskServer = &tasks.TaskServer{
+		Config:            _applicationConfig.TaskServerConfig,
+		DNSValidationTask: DNSValidationTask,
+		URLValidationTask: URLValidationTask,
+	}
 )
 
 func main() {
@@ -24,22 +30,22 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
-	})
+	if _applicationConfig.Health {
+		e.GET("/health", func(c echo.Context) error {
+			return c.String(http.StatusOK, "OK")
+		})
+	}
 
 	domain_validation_handlers := handlers.DomainValidationHandlers{
-		TaskServer:        &taskServer,
-		URLValidationTask: URLValidationTask,
+		TaskServer: taskServer,
 	}
 
 	dns_validation_handlers := handlers.DNSValidationHandlers{
-		TaskServer:        &taskServer,
-		DNSValidationTask: DNSValidationTask,
+		TaskServer: taskServer,
 	}
 
 	domain_validation_handlers.BindHandlers(e)
 	dns_validation_handlers.BindHandlers(e)
 
-	e.Logger.Fatal(e.Start(":1325"))
+	e.Logger.Fatal(e.Start(":" + _applicationConfig.Port))
 }

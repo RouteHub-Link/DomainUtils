@@ -1,6 +1,6 @@
 # DomainUtils
-<img width="1674" alt="image" src="https://github.com/RouteHub-Link/DomainUtils/assets/16222645/14e6d2e9-a719-4a98-bd89-f3412a24d21d">
 
+<img width="1674" alt="image" src="https://github.com/RouteHub-Link/DomainUtils/assets/16222645/14e6d2e9-a719-4a98-bd89-f3412a24d21d">
 
 ## Table of Contents
 
@@ -12,6 +12,7 @@
 ## About <a name = "about"></a>
 
 This project is a URL Validator Service has three main purposes:
+
 1. URL Validation: The service will validate a URL with Configuration options to allow or disallow certain URL patterns.
 2. Seek The URL: The service will seek the URL and return the response status code. With some additional configuration options for more advanced use cases.
 3. DNS TXT Lookup: The service will perform a DNS TXT lookup on the domain of the URL and return the TXT record.
@@ -37,6 +38,9 @@ What things you need to install the software and how to install them.
 - [asynq](https://github.com/gocolly/colly)
 - [asynqmon](https://github.com/hibiken/asynqmon)
 - [validator](https://github.com/RouteHub-Link/DomainUtils/tree/main/validator)
+- [echo](https://github.com/labstack/echo)
+- [koanf](https://github.com/knadh/koanf/)
+- [mergo](https://github.com/darccio/mergo)
 
 ### Validator Dependencies
 
@@ -45,7 +49,6 @@ What things you need to install the software and how to install them.
 
 ### Installing as Service
 
-A step by step series of examples that tell you how to get a development env running.
 Redis is a hard requirement for the service to run. Make sure you have redis installed and running.
 If you wanna change the redis configuration, you can do it from main.go file.
 
@@ -56,24 +59,29 @@ go run .
 ```
 
 Endpoints and Responses
+
 - POST /validate/url
 - POST /validate/dns
-    - Request
+  - Request
+
         ```json
         {
         "url": "https://www.google.com"
         }
         ```
-    - Response
+
+  - Response
+
         ```json
         {
         "task_id": "task_id"
         }
         ```
 
-- GET /validate/url/task_id 
+- GET /validate/url/task_id
 - GET /validate/dns/task_id
-    - Response
+  - Response
+
         ```json
         {
         "ID": "732c5e2c-4dec-429a-9613-b1fe6427232b",
@@ -104,7 +112,7 @@ Note check validator.go for configuration implementation.
 
 ```go
     var _validator = validator.DefaultValidator()
-	isValid, err := _validator.ValidateURL(payload.Link)
+ isValid, err := _validator.ValidateURL(payload.Link)
     if err != nil {
         log.Println(err)
     }
@@ -132,4 +140,51 @@ Note check validator.go for configuration implementation.
 
     _validator := validator.NewValidator(customConfig)
     isValid, err := _validator.ValidateURL(payload.Link)
+```
+
+## Usage <a name = "usage"></a>
+
+For starting the service, you can use the following command:
+
+```bash
+go run .
+```
+
+Starting via config file please edit config.yaml file.
+If there is not a config.yaml file, the service will use the default configuration and you will see the following output:
+
+```bash
+error loading config: open config.yaml: no such file or directory
+```
+
+Also you can use the following command to start the service.
+
+```bash
+go build .
+./DomainUtils -r "127.0.0.1:6379" -p 1235
+```
+
+for more information about the flags, you can use the following command:
+
+```bash
+./DomainUtils -h
+```
+
+- The service will start on port 8080 by default.
+- Config.yaml file uses 1235 as the port number.
+- Asynqmon will start on port 8081 by default.
+
+This is the output you will see when the service is started:
+
+```bash
+   ____    __
+  / __/___/ /  ___
+ / _// __/ _ \/ _ \
+/___/\__/_//_/\___/ v4.12.0
+High performance, minimalist Go web framework
+https://echo.labstack.com
+____________________________________O/_______
+                                    O\
+⇨ http server started on [::]:1235
+Monitoring server is running link: http://localhost:8081/monitoring
 ```
