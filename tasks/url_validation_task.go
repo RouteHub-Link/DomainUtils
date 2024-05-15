@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/RouteHub-Link/URLValidator/validator"
+	"github.com/RouteHub-Link/DomainUtils/validator"
 	"github.com/hibiken/asynq"
 )
 

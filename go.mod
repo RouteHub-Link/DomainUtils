@@ -1,4 +1,4 @@
-module github.com/RouteHub-Link/URLValidator
+module github.com/RouteHub-Link/DomainUtils
 
 go 1.22.1
 

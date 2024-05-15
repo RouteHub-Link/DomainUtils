@@ -5,7 +5,7 @@ import (
 
 	"net/http"
 
-	"github.com/RouteHub-Link/URLValidator/tasks"
+	"github.com/RouteHub-Link/DomainUtils/tasks"
 	"github.com/hibiken/asynq"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

@@ -1,5 +1,5 @@
-# URLValidator
-<img width="1674" alt="image" src="https://github.com/RouteHub-Link/URLValidator/assets/16222645/14e6d2e9-a719-4a98-bd89-f3412a24d21d">
+# DomainUtils
+<img width="1674" alt="image" src="https://github.com/RouteHub-Link/DomainUtils/assets/16222645/14e6d2e9-a719-4a98-bd89-f3412a24d21d">
 
 
 ## Table of Contents
@@ -36,7 +36,7 @@ What things you need to install the software and how to install them.
 
 - [asynq](https://github.com/gocolly/colly)
 - [asynqmon](https://github.com/hibiken/asynqmon)
-- [validator](https://github.com/RouteHub-Link/URLValidator/tree/main/validator)
+- [validator](https://github.com/RouteHub-Link/DomainUtils/tree/main/validator)
 
 ### Validator Dependencies
 
@@ -50,8 +50,8 @@ Redis is a hard requirement for the service to run. Make sure you have redis ins
 If you wanna change the redis configuration, you can do it from main.go file.
 
 ```bash
-git clone https://github.com/RouteHub-Link/URLValidator.git
-cd URLValidator
+git clone https://github.com/RouteHub-Link/DomainUtils.git
+cd DomainUtils
 go run .
 ```
 
@@ -98,7 +98,7 @@ Endpoints and Responses
 
 ### Installing as Validator Package Only
 
-- go get github.com/RouteHub-Link/URLValidator/validator
+- go get github.com/RouteHub-Link/DomainUtils/validator
 
 Note check validator.go for configuration implementation.
 
