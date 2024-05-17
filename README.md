@@ -35,7 +35,7 @@ What things you need to install the software and how to install them.
 
 ### Service Dependencies
 
-- [asynq](https://github.com/gocolly/colly)
+- [asynq](https://github.com/hibiken/asynq)
 - [asynqmon](https://github.com/hibiken/asynqmon)
 - [validator](https://github.com/RouteHub-Link/DomainUtils/tree/main/validator)
 - [echo](https://github.com/labstack/echo)
