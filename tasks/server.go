@@ -24,6 +24,7 @@ type TaskServerConfig struct {
 
 var DefaultTaskServerConfig = TaskServerConfig{
 	RedisAddr:      "localhost:6379",
+	MonitoringDash: true,
 	MonitoringPath: "/monitoring",
 	MonitoringPort: "8081",
 	Concurrency:    10,

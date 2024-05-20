@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/RouteHub-Link/DomainUtils/handlers"
@@ -50,5 +51,6 @@ func main() {
 	domain_validation_handlers.BindHandlers(e)
 	dns_validation_handlers.BindHandlers(e)
 
+	log.Printf("Starting server on port %s", _applicationConfig.Port)
 	e.Logger.Fatal(e.Start(":" + _applicationConfig.Port))
 }
