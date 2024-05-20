@@ -9,6 +9,7 @@ validator:
   content_type_must_be_html: true
 task_server:
   redis_addr: 127.0.0.1:6379
+  monitoring_dashboard: true
   monitoring_path: /monitoring
   monitoring_port: 8081
   concurrency: 10

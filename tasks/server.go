@@ -16,6 +16,7 @@ type TaskServer struct {
 
 type TaskServerConfig struct {
 	RedisAddr      string `koanf:"redis_addr"`
+	MonitoringDash bool   `koanf:"monitoring_dashboard"`
 	MonitoringPath string `koanf:"monitoring_path"`
 	MonitoringPort string `koanf:"monitoring_port"`
 	Concurrency    int    `koanf:"concurrency"`

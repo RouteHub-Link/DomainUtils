@@ -23,7 +23,10 @@ var (
 
 func main() {
 	go taskServer.Serve()
-	go taskServer.AsynqmonServe()
+
+	if _applicationConfig.TaskServerConfig.MonitoringDash {
+		go taskServer.AsynqmonServe()
+	}
 
 	e := echo.New()
 

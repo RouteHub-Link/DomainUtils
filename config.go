@@ -59,6 +59,7 @@ func GetApplicationConfig() *ApplicationConfig {
 		f.StringVarP(&_appConfig.Port, "port", "p", "8080", "Port to listen on")
 		f.BoolVarP(&_appConfig.Health, "health", "h", true, "Enable health check endpoint")
 		f.StringVarP(&_appConfig.TaskServerConfig.RedisAddr, "redis-addr", "r", "", "Redis address")
+		f.BoolVarP(&_appConfig.TaskServerConfig.MonitoringDash, "monitoring-dash", "m", false, "Enable monitoring dashboard")
 		f.Parse(os.Args[1:])
 
 		if err := k.Load(file.Provider("config.yaml"), yaml.Parser()); err != nil {
