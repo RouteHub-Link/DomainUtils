@@ -1,4 +1,7 @@
-# DomainUtils
+# DomainUtils 
+
+![gov120](https://github.com/RouteHub-Link/DomainUtils/assets/16222645/3d751aaa-ad97-45a4-9c89-99521729e44a)
+[![Go Report Card](https://goreportcard.com/badge/github.com/RouteHub-Link/DomainUtils)](https://goreportcard.com/report/github.com/RouteHub-Link/DomainUtils)
 
 <img width="1674" alt="image" src="https://github.com/RouteHub-Link/DomainUtils/assets/16222645/14e6d2e9-a719-4a98-bd89-f3412a24d21d">
 
