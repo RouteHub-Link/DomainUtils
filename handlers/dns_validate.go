@@ -8,11 +8,12 @@ import (
 )
 
 type DNSValidationHandlers struct {
-	TaskServer *tasks.TaskServer
+	TaskServerConfig  *tasks.TaskServerConfig
+	DNSValidationTask *tasks.DNSValidationTask
 }
 
 func (dvh DNSValidationHandlers) HandlePostValidateDNS(c echo.Context) error {
-	client := dvh.TaskServer.NewClient()
+	client := dvh.TaskServerConfig.NewClient()
 	defer client.Close()
 
 	validationPaylod := new(tasks.DNSValidationPayload)
@@ -20,7 +21,7 @@ func (dvh DNSValidationHandlers) HandlePostValidateDNS(c echo.Context) error {
 		return err
 	}
 
-	task, err := dvh.TaskServer.DNSValidationTask.NewURLValidationTask(validationPaylod.Link, validationPaylod.Value)
+	task, err := dvh.DNSValidationTask.NewURLValidationTask(validationPaylod.Link, validationPaylod.Value)
 	if err != nil {
 		return err
 	}
@@ -36,7 +37,7 @@ func (dvh DNSValidationHandlers) HandlePostValidateDNS(c echo.Context) error {
 }
 
 func (dvh DNSValidationHandlers) HandleGetValidateDNS(c echo.Context) error {
-	inspector := dvh.TaskServer.NewInspector()
+	inspector := dvh.TaskServerConfig.NewInspector()
 	defer inspector.Close()
 
 	infoPayload := new(tasks.InfoPayload)
@@ -47,7 +48,7 @@ func (dvh DNSValidationHandlers) HandleGetValidateDNS(c echo.Context) error {
 
 	infoPayload.ID = id
 
-	taskInfo, err := inspector.GetTaskInfo(dvh.TaskServer.DNSValidationTask.Settings.Queue, infoPayload.ID)
+	taskInfo, err := inspector.GetTaskInfo(dvh.DNSValidationTask.Settings.Queue, infoPayload.ID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}

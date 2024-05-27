@@ -19,6 +19,7 @@ tasks:
     task_queue: "dns_validation_queue"
     task_priority: 4
     dns_txt_record: "routehub_domainkey"
+    dns_server: "8.8.8.8:53"
   url_validation_task:
     task_name: "url:validate"
     task_queue: "url_validation_queue"

@@ -54,11 +54,42 @@ What things you need to install the software and how to install them.
 
 Redis is a hard requirement for the service to run. Make sure you have redis installed and running.
 If you wanna change the redis configuration, you can do it from main.go file.
+You must run this following command to use as a service. (I will create a docker option for hosting the service soon.)
+
+1. Clone the repository.
 
 ```bash
 git clone https://github.com/RouteHub-Link/DomainUtils.git
 cd DomainUtils
-go run .
+```
+
+2. Build the service.
+
+```bash
+go build .
+./DomainUtils --help
+```
+
+3. Starting the service.
+
+Basicliy, you need 3 terminals to run the service. One for handling tasks, one for monitoring tasks and one for handling requests.
+
+1. Starting for handling tasks.
+
+```bash
+    ./DomainUtils -s 1
+```
+
+2. Starting for monitoring tasks. (Runs asynqmon optional)
+
+```bash
+    ./DomainUtils -s 2
+```
+
+3. Starting for handling requests.
+
+```bash
+    ./DomainUtils
 ```
 
 Endpoints and Responses
@@ -173,21 +204,15 @@ for more information about the flags, you can use the following command:
 ./DomainUtils -h
 ```
 
-- The service will start on port 8080 by default.
-- Config.yaml file uses 1235 as the port number.
-- Asynqmon will start on port 8081 by default.
-
-This is the output you will see when the service is started:
+- For changin the serving mode, you can use the following command:
 
 ```bash
-   ____    __
-  / __/___/ /  ___
- / _// __/ _ \/ _ \
-/___/\__/_//_/\___/ v4.12.0
-High performance, minimalist Go web framework
-https://echo.labstack.com
-____________________________________O/_______
-                                    O\
-⇨ http server started on [::]:1235
-Monitoring server is running link: http://localhost:8081/monitoring
+    -s, --serving-mode int8   Serves application as selected mode.
+        -s 0 or --serving-mode 0 
+        0 : TaskClient
+        1 : TaskServer
+        2 : TaskMonitoring
+        Default : 0
+
+    ./DomainUtils -s 1
 ```

@@ -9,11 +9,13 @@ type DNSRecord struct {
 	Records    []string
 }
 
-func fetchDNSRecords(domain string, recordType uint16) ([]dns.RR, error) {
+func fetchDNSRecords(server string, domain string, recordType uint16) ([]dns.RR, error) {
 
 	client := dns.Client{}
-	server := "1.1.1.1:53"
 
+	if server == "" {
+		server = "1.1.1.1:53"
+	}
 	// Query for DNS records
 	msg := dns.Msg{}
 	msg.SetQuestion(dns.Fqdn(domain), recordType)

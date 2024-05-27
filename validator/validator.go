@@ -121,7 +121,7 @@ func (v Validator) ValidateURL(inputURL string) (isValid bool, err error) {
 	return true, nil
 }
 
-func (v Validator) ValidateOwnershipOverDNSTxtRecord(inputURL string, DNSName string, DNSValue string) (isValid bool, err error) {
+func (v Validator) ValidateOwnershipOverDNSTxtRecord(inputURL string, DNSName string, DNSValue string, DNSServer string) (isValid bool, err error) {
 
 	isValid = false
 
@@ -142,7 +142,7 @@ func (v Validator) ValidateOwnershipOverDNSTxtRecord(inputURL string, DNSName st
 
 	recordKey := strings.Join([]string{DNSName, parsedURL.Host}, ".")
 
-	records, err := fetchDNSRecords(recordKey, dns.TypeTXT)
+	records, err := fetchDNSRecords(DNSServer, recordKey, dns.TypeTXT)
 	if err != nil {
 		return
 	}

@@ -14,30 +14,6 @@ type TaskServer struct {
 	URLValidationTask *URLValidationTask
 }
 
-type TaskServerConfig struct {
-	RedisAddr      string `koanf:"redis_addr"`
-	MonitoringDash bool   `koanf:"monitoring_dashboard"`
-	MonitoringPath string `koanf:"monitoring_path"`
-	MonitoringPort string `koanf:"monitoring_port"`
-	Concurrency    int    `koanf:"concurrency"`
-}
-
-var DefaultTaskServerConfig = TaskServerConfig{
-	RedisAddr:      "localhost:6379",
-	MonitoringDash: true,
-	MonitoringPath: "/monitoring",
-	MonitoringPort: "8081",
-	Concurrency:    10,
-}
-
-func (t *TaskServer) NewInspector() *asynq.Inspector {
-	return asynq.NewInspector(asynq.RedisClientOpt{Addr: t.Config.RedisAddr})
-}
-
-func (t *TaskServer) NewClient() *asynq.Client {
-	return asynq.NewClient(asynq.RedisClientOpt{Addr: t.Config.RedisAddr})
-}
-
 func (t *TaskServer) Serve() {
 	asynqQueue := map[string]int{
 		"critical": 6,
@@ -76,6 +52,5 @@ func (t *TaskServer) AsynqmonServe() {
 	http.Handle(h.RootPath()+"/", h)
 	log.Printf("Monitoring server is running link: http://localhost:%s%s", t.Config.MonitoringPort, t.Config.MonitoringPath)
 
-	// Go to http://localhost:8080/monitoring to see asynqmon homepage.
 	log.Fatal(http.ListenAndServe(":"+t.Config.MonitoringPort, nil))
 }

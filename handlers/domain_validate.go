@@ -8,7 +8,8 @@ import (
 )
 
 type DomainValidationHandlers struct {
-	TaskServer *tasks.TaskServer
+	TaskServerConfig  *tasks.TaskServerConfig
+	URLValidationTask *tasks.URLValidationTask
 }
 
 func (dvh DomainValidationHandlers) BindHandlers(e *echo.Echo) {
@@ -17,7 +18,7 @@ func (dvh DomainValidationHandlers) BindHandlers(e *echo.Echo) {
 }
 
 func (dvh DomainValidationHandlers) HandlePostValidateURL(c echo.Context) error {
-	client := dvh.TaskServer.NewClient()
+	client := dvh.TaskServerConfig.NewClient()
 	defer client.Close()
 
 	validationPaylod := new(tasks.URLValidationPayload)
@@ -25,7 +26,7 @@ func (dvh DomainValidationHandlers) HandlePostValidateURL(c echo.Context) error 
 		return err
 	}
 
-	task, err := dvh.TaskServer.URLValidationTask.NewURLValidationTask(validationPaylod.Link)
+	task, err := dvh.URLValidationTask.NewURLValidationTask(validationPaylod.Link)
 	if err != nil {
 		return err
 	}
@@ -40,7 +41,7 @@ func (dvh DomainValidationHandlers) HandlePostValidateURL(c echo.Context) error 
 }
 
 func (dvh DomainValidationHandlers) HandleGetValidateURL(c echo.Context) error {
-	inspector := dvh.TaskServer.NewInspector()
+	inspector := dvh.TaskServerConfig.NewInspector()
 	defer inspector.Close()
 
 	infoPayload := new(tasks.InfoPayload)
@@ -51,7 +52,7 @@ func (dvh DomainValidationHandlers) HandleGetValidateURL(c echo.Context) error {
 
 	infoPayload.ID = id
 
-	taskInfo, err := inspector.GetTaskInfo(dvh.TaskServer.URLValidationTask.Settings.Queue, infoPayload.ID)
+	taskInfo, err := inspector.GetTaskInfo(dvh.URLValidationTask.Settings.Queue, infoPayload.ID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}

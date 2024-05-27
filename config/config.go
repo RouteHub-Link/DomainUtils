@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -34,19 +34,6 @@ var (
 	}
 	k = koanf.NewWithConf(conf)
 )
-
-type ApplicationConfig struct {
-	ValidatorConfig  validator.CheckConfig  `koanf:"validator"`
-	TaskServerConfig tasks.TaskServerConfig `koanf:"task_server"`
-	TaskConfigs      TaskConfigs            `koanf:"tasks"`
-	Port             string                 `koanf:"port"`
-	Health           bool                   `koanf:"health"`
-}
-
-type TaskConfigs struct {
-	DNSValidationTaskConfig tasks.DNSValidationTaskConfig `koanf:"dns_validation_task"`
-	URLValidationTaskConfig tasks.URLValidationTaskConfig `koanf:"url_validation_task"`
-}
 
 func GetApplicationConfig() *ApplicationConfig {
 	onceConfigure.Do(func() {
@@ -136,5 +123,9 @@ func parseFlags() {
 
 	f.BoolVarP(&_appConfig.TaskServerConfig.MonitoringDash, "monitoring-dash", "m", _appConfig.TaskServerConfig.MonitoringDash, "Enable monitoring dashboard")
 
+	var hostingMode int8
+	f.Int8VarP(&hostingMode, "serving-mode", "s", hostingMode, "Serves application as selected mode.\n-s 0 or --serving-mode 0 \n0 : TaskClient\n1 : TaskServer\n2 : TaskMonitoring\nDefault : 0")
+
 	f.Parse(os.Args[1:])
+	_appConfig.HostingMode = HostingMode(hostingMode)
 }

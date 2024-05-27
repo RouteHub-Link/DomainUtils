@@ -33,5 +33,5 @@ func test() {
 }
 
 func dnsTest() {
-	_validator.ValidateOwnershipOverDNSTxtRecord("https://routehub.link", "routehub_domainkey", "e322c8a8ffef929ce17002ec521eeee2")
+	_validator.ValidateOwnershipOverDNSTxtRecord("https://routehub.link", "routehub_domainkey", "e322c8a8ffef929ce17002ec521eeee2", "1.1.1.1:53")
 }

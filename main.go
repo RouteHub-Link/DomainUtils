@@ -1,54 +1,33 @@
 package main
 
 import (
-	"net/http"
-
+	"github.com/RouteHub-Link/DomainUtils/config"
 	"github.com/RouteHub-Link/DomainUtils/handlers"
 	"github.com/RouteHub-Link/DomainUtils/tasks"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
-	_applicationConfig = GetApplicationConfig()
-	URLValidationTask  = tasks.NewURLValidationTaskWithConfig(_applicationConfig.TaskConfigs.URLValidationTaskConfig)
-	DNSValidationTask  = tasks.NewDNSValidationTaskWithConfig(_applicationConfig.TaskConfigs.DNSValidationTaskConfig)
+	applicationConfig = config.GetApplicationConfig()
+	URLValidationTask = tasks.NewURLValidationTaskWithConfig(applicationConfig.TaskConfigs.URLValidationTaskConfig)
+	DNSValidationTask = tasks.NewDNSValidationTaskWithConfig(applicationConfig.TaskConfigs.DNSValidationTaskConfig)
 
 	taskServer = &tasks.TaskServer{
-		Config:            _applicationConfig.TaskServerConfig,
+		Config:            applicationConfig.TaskServerConfig,
 		DNSValidationTask: DNSValidationTask,
 		URLValidationTask: URLValidationTask,
 	}
 )
 
 func main() {
-	go taskServer.Serve()
-
-	if _applicationConfig.TaskServerConfig.MonitoringDash {
-		go taskServer.AsynqmonServe()
+	switch applicationConfig.HostingMode {
+	case config.TaskClient:
+		es := handlers.EchoServer{
+			ApplicationConfig: applicationConfig,
+		}
+		es.Serve()
+	case config.TaskServer:
+		taskServer.Serve()
+	case config.TaskMonitoring:
+		taskServer.AsynqmonServe()
 	}
-
-	e := echo.New()
-
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-
-	if _applicationConfig.Health {
-		e.GET("/health", func(c echo.Context) error {
-			return c.String(http.StatusOK, "OK")
-		})
-	}
-
-	domain_validation_handlers := handlers.DomainValidationHandlers{
-		TaskServer: taskServer,
-	}
-
-	dns_validation_handlers := handlers.DNSValidationHandlers{
-		TaskServer: taskServer,
-	}
-
-	domain_validation_handlers.BindHandlers(e)
-	dns_validation_handlers.BindHandlers(e)
-
-	e.Logger.Fatal(e.Start(":" + _applicationConfig.Port))
 }

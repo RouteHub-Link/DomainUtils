@@ -16,12 +16,14 @@ type DNSValidationTaskConfig struct {
 	DNSTXTRecord string `koanf:"dns_txt_record"`
 	TaskQueue    string `koanf:"task_queue"`
 	TaskPriority int    `koanf:"task_priority"`
+	DNSServer    string `koanf:"dns_server"`
 }
 
 var DefaultDNSValidationTaskConfig = DNSValidationTaskConfig{
 	TaskName:     "dns:validate",
 	DNSTXTRecord: "routehub_domainkey",
 	TaskQueue:    "dns-validation",
+	DNSServer:    "1.1.1.1:53",
 	TaskPriority: 4,
 }
 
@@ -87,7 +89,7 @@ func (t *DNSValidationTask) HandleDNSValidationTask(ctx context.Context, task *a
 		return fmt.Errorf("%v : %w", string(payloadBytes), asynq.SkipRetry)
 	}
 
-	isvalid, err := _validator.ValidateOwnershipOverDNSTxtRecord(payload.Link, t.TaskConfig.DNSTXTRecord, payload.Value)
+	isvalid, err := _validator.ValidateOwnershipOverDNSTxtRecord(payload.Link, t.TaskConfig.DNSTXTRecord, payload.Value, t.TaskConfig.DNSServer)
 	res.IsValid = isvalid
 
 	if err != nil {
