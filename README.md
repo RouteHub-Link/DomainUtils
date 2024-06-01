@@ -1,4 +1,4 @@
-# DomainUtils 
+# DomainUtils
 
 ![gov120](https://github.com/RouteHub-Link/DomainUtils/assets/16222645/3d751aaa-ad97-45a4-9c89-99521729e44a)
 [![Go Report Card](https://goreportcard.com/badge/github.com/RouteHub-Link/DomainUtils)](https://goreportcard.com/report/github.com/RouteHub-Link/DomainUtils)
@@ -69,8 +69,15 @@ cd DomainUtils
 go build .
 ./DomainUtils --help
 ```
-
 3. Starting the service.
+
+3.1 Stating via Docker
+
+```bash
+docker-compose up --build
+```
+
+3.2 Starting the service.
 
 Basicliy, you need 3 terminals to run the service. One for handling tasks, one for monitoring tasks and one for handling requests.
 
@@ -208,8 +215,8 @@ for more information about the flags, you can use the following command:
 
 ```bash
     -s, --serving-mode int8   Serves application as selected mode.
-        -s 0 or --serving-mode 0 
-        0 : TaskClient
+        -s 0 or --serving-mode 0
+        0 : TaskReceiver
         1 : TaskServer
         2 : TaskMonitoring
         Default : 0

@@ -44,13 +44,13 @@ func (t *TaskServer) Serve() {
 
 func (t *TaskServer) AsynqmonServe() {
 	h := asynqmon.New(asynqmon.Options{
-		RootPath:     t.Config.MonitoringPath, // RootPath specifies the root for asynqmon app
+		RootPath:     t.Config.MonitoringPath,
 		RedisConnOpt: asynq.RedisClientOpt{Addr: t.Config.RedisAddr},
 	})
 
-	// Note: We need the tailing slash when using net/http.ServeMux.
 	http.Handle(h.RootPath()+"/", h)
-	log.Printf("Monitoring server is running link: http://localhost:%s%s", t.Config.MonitoringPort, t.Config.MonitoringPath)
+	http.Handle("/", http.RedirectHandler(h.RootPath(), http.StatusFound))
 
+	log.Printf("Monitoring server is running link: http://localhost:%s%s", t.Config.MonitoringPort, t.Config.MonitoringPath)
 	log.Fatal(http.ListenAndServe(":"+t.Config.MonitoringPort, nil))
 }

@@ -8,21 +8,21 @@ import (
 type HostingMode int8
 
 const (
-	TaskClient HostingMode = iota
+	TaskReceiver HostingMode = iota
 	TaskServer
 	TaskMonitoring
 	Debug
 )
 
 var HostingModeNames = map[HostingMode]string{
-	TaskClient:     "TaskClient",
+	TaskReceiver:   "TaskReceiver",
 	TaskServer:     "TaskServer",
 	TaskMonitoring: "TaskMonitoring",
 	Debug:          "Debug",
 }
 
 var HostingModeIds = map[HostingMode]int8{
-	TaskClient:     0,
+	TaskReceiver:   0,
 	TaskServer:     1,
 	TaskMonitoring: 2,
 	Debug:          3,

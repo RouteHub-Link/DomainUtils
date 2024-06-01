@@ -20,7 +20,7 @@ var (
 
 func main() {
 	switch applicationConfig.HostingMode {
-	case config.TaskClient:
+	case config.TaskReceiver:
 		es := handlers.EchoServer{
 			ApplicationConfig: applicationConfig,
 		}
