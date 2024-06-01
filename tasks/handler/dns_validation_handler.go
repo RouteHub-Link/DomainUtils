@@ -41,8 +41,7 @@ func (t *DNSValidationTask) HandleDNSValidationTask(ctx context.Context, task *a
 		errorMsg = err.Error()
 	}
 
-	taskResultPayload.IsValid = isvalid
-	taskResultPayload.Error = &errorMsg
+	taskResultPayload = TaskResultPayload{}.New(isvalid, "", errorMsg)
 
 	// if the error is due to the domain being unreachable, return the error for retry
 	if !isvalid {
