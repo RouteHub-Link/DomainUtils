@@ -26,6 +26,12 @@ func test() {
 		if err != nil {
 			fmt.Println(err)
 		}
+
+		_, err = _validator.ValidateSite(link)
+
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
