@@ -184,7 +184,8 @@ Note check validator.go for configuration implementation.
     isValid, err := _validator.ValidateURL(payload.Link)
 
     if isValid {
-    
+        isSiteValid, err = _validator.ValidateSite(link)
+        // do something with bool & err
     }
 ```
 
