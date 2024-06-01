@@ -11,6 +11,14 @@ import (
 
 type EchoServer struct {
 	ApplicationConfig *config.ApplicationConfig
+	TaskServer        *tasks.TaskServer
+}
+
+func NewEchoServer(config *config.ApplicationConfig, taskServer *tasks.TaskServer) *EchoServer {
+	return &EchoServer{
+		ApplicationConfig: config,
+		TaskServer:        taskServer,
+	}
 }
 
 func (es EchoServer) Serve() {
@@ -26,18 +34,24 @@ func (es EchoServer) Serve() {
 		})
 	}
 
-	domain_validation_handlers := DomainValidationHandlers{
+	url_validation_handlers := URLValidationHandlers{
 		TaskServerConfig:  &config.TaskServerConfig,
-		URLValidationTask: tasks.NewURLValidationTaskWithConfig(config.TaskConfigs.URLValidationTaskConfig),
+		URLValidationTask: es.TaskServer.URLValidationTask,
 	}
 
 	dns_validation_handlers := DNSValidationHandlers{
 		TaskServerConfig:  &config.TaskServerConfig,
-		DNSValidationTask: tasks.NewDNSValidationTaskWithConfig(config.TaskConfigs.DNSValidationTaskConfig),
+		DNSValidationTask: es.TaskServer.DNSValidationTask,
 	}
 
-	domain_validation_handlers.BindHandlers(e)
+	site_validation_handlers := SiteValidationHandlers{
+		TaskServerConfig:   &config.TaskServerConfig,
+		SiteValidationTask: es.TaskServer.SiteValidationTask,
+	}
+
+	url_validation_handlers.BindHandlers(e)
 	dns_validation_handlers.BindHandlers(e)
+	site_validation_handlers.BindHandlers(e)
 
 	e.Logger.Fatal(e.Start(":" + config.Port))
 }

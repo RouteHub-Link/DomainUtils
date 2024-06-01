@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/RouteHub-Link/DomainUtils/tasks"
+	tasks_config "github.com/RouteHub-Link/DomainUtils/tasks/config"
 	"github.com/RouteHub-Link/DomainUtils/validator"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/v2"
@@ -22,8 +23,10 @@ var (
 	_appConfig = &ApplicationConfig{
 		ValidatorConfig:  validator.CheckConfig{},
 		TaskServerConfig: tasks.TaskServerConfig{},
-		TaskConfigs: TaskConfigs{
-			DNSValidationTaskConfig: tasks.DNSValidationTaskConfig{},
+		TaskConfigs: tasks_config.TaskConfigs{
+			DNSValidation:  tasks_config.DefaultDNSValidationTaskConfig,
+			URLValidation:  tasks_config.DefaultURLValidationTaskConfig,
+			SiteValidation: tasks_config.DefaultSiteValidationTaskConfig,
 		},
 	}
 
@@ -102,12 +105,16 @@ func setDefaults() {
 		log.Fatalf("error merging task server config: %v", err)
 	}
 
-	if err := mergo.Merge(&_appConfig.TaskConfigs.DNSValidationTaskConfig, tasks.DefaultDNSValidationTaskConfig); err != nil {
+	if err := mergo.Merge(&_appConfig.TaskConfigs.DNSValidation, tasks_config.DefaultDNSValidationTaskConfig); err != nil {
 		log.Fatalf("error merging dns validation task config: %v", err)
 	}
 
-	if err := mergo.Merge(&_appConfig.TaskConfigs.URLValidationTaskConfig, tasks.DefaultURLValidationTaskConfig); err != nil {
+	if err := mergo.Merge(&_appConfig.TaskConfigs.URLValidation, tasks_config.DefaultURLValidationTaskConfig); err != nil {
 		log.Fatalf("error merging url validation task config: %v", err)
+	}
+
+	if err := mergo.Merge(&_appConfig.TaskConfigs.SiteValidation, tasks_config.DefaultSiteValidationTaskConfig); err != nil {
+		log.Fatalf("error merging site validation task config: %v", err)
 	}
 
 	if _appConfig.Port == "" {

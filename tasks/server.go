@@ -4,14 +4,27 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/RouteHub-Link/DomainUtils/tasks/config"
+	"github.com/RouteHub-Link/DomainUtils/tasks/handler"
+	"github.com/RouteHub-Link/DomainUtils/validator"
 	"github.com/hibiken/asynq"
 	"github.com/hibiken/asynqmon"
 )
 
 type TaskServer struct {
-	Config            TaskServerConfig
-	DNSValidationTask *DNSValidationTask
-	URLValidationTask *URLValidationTask
+	Config             TaskServerConfig
+	DNSValidationTask  *handler.DNSValidationTask
+	URLValidationTask  *handler.URLValidationTask
+	SiteValidationTask *handler.SiteValidationTask
+}
+
+func NewDefaultTaskServer(config TaskServerConfig, taskConfigs config.TaskConfigs, validator *validator.Validator) *TaskServer {
+	return &TaskServer{
+		Config:             config,
+		DNSValidationTask:  handler.NewDNSValidationTaskWithDefaults(taskConfigs.DNSValidation, validator),
+		URLValidationTask:  handler.NewURLValidationTaskWithDefaults(taskConfigs.URLValidation, validator),
+		SiteValidationTask: handler.NewSiteValidationTaskWithDefaults(taskConfigs.SiteValidation, validator),
+	}
 }
 
 func (t *TaskServer) Serve() {
@@ -23,6 +36,7 @@ func (t *TaskServer) Serve() {
 
 	asynqQueue[t.URLValidationTask.Settings.Queue] = t.URLValidationTask.Settings.QueuePriority
 	asynqQueue[t.DNSValidationTask.Settings.Queue] = t.DNSValidationTask.Settings.QueuePriority
+	asynqQueue[t.SiteValidationTask.Settings.Queue] = t.SiteValidationTask.Settings.QueuePriority
 
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{Addr: t.Config.RedisAddr},
@@ -36,6 +50,7 @@ func (t *TaskServer) Serve() {
 
 	mux.HandleFunc(t.URLValidationTask.TaskConfig.TaskName, t.URLValidationTask.HandleURLValidationTask)
 	mux.HandleFunc(t.DNSValidationTask.TaskConfig.TaskName, t.DNSValidationTask.HandleDNSValidationTask)
+	mux.HandleFunc(t.SiteValidationTask.TaskConfig.TaskName, t.SiteValidationTask.HandleSiteValidationTask)
 
 	if err := srv.Run(mux); err != nil {
 		log.Fatalf("could not run server: %v", err)
