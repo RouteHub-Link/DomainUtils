@@ -6,11 +6,8 @@ import (
 	"github.com/RouteHub-Link/DomainUtils/validator"
 )
 
-var (
-	_validator = validator.DefaultValidator()
-)
-
 func test() {
+	_validator := validator.DefaultValidator()
 	fmt.Println("Hello, World!")
 
 	links := []string{
@@ -33,5 +30,6 @@ func test() {
 }
 
 func dnsTest() {
+	_validator := validator.DefaultValidator()
 	_validator.ValidateOwnershipOverDNSTxtRecord("https://routehub.link", "routehub_domainkey", "e322c8a8ffef929ce17002ec521eeee2", "1.1.1.1:53")
 }

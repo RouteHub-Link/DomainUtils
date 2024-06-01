@@ -4,26 +4,24 @@ import (
 	"github.com/RouteHub-Link/DomainUtils/config"
 	"github.com/RouteHub-Link/DomainUtils/handlers"
 	"github.com/RouteHub-Link/DomainUtils/tasks"
+	"github.com/RouteHub-Link/DomainUtils/validator"
 )
 
 var (
 	applicationConfig = config.GetApplicationConfig()
-	URLValidationTask = tasks.NewURLValidationTaskWithConfig(applicationConfig.TaskConfigs.URLValidationTaskConfig)
-	DNSValidationTask = tasks.NewDNSValidationTaskWithConfig(applicationConfig.TaskConfigs.DNSValidationTaskConfig)
+	taskValidator     = validator.DefaultValidator()
 
-	taskServer = &tasks.TaskServer{
-		Config:            applicationConfig.TaskServerConfig,
-		DNSValidationTask: DNSValidationTask,
-		URLValidationTask: URLValidationTask,
-	}
+	taskServer = tasks.NewDefaultTaskServer(
+		applicationConfig.TaskServerConfig,
+		applicationConfig.TaskConfigs,
+		taskValidator,
+	)
 )
 
 func main() {
 	switch applicationConfig.HostingMode {
 	case config.TaskReceiver:
-		es := handlers.EchoServer{
-			ApplicationConfig: applicationConfig,
-		}
+		es := handlers.NewEchoServer(applicationConfig, taskServer)
 		es.Serve()
 	case config.TaskServer:
 		taskServer.Serve()

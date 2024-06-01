@@ -2,7 +2,6 @@ package validator
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/url"
 	"regexp"
@@ -68,61 +67,62 @@ func (v Validator) ValidateURL(inputURL string) (isValid bool, err error) {
 		return
 	}
 
-	if v.seekIsNeeded() {
+	return true, nil
+}
 
-		seeker := NewSeeker(v.config, nil)
+// Validate a Website via visiting the URL and checking the response according to the configuration.
+func (v Validator) ValidateSite(inputURL string) (isValid bool, err error) {
+	seeker := NewSeeker(v.config, nil)
 
-		if seeker == nil {
-			err = &CheckError{CheckErrorMessages[ErrSeekerNotInitialized]}
-			return
-		}
+	if seeker == nil {
+		err = &CheckError{CheckErrorMessages[ErrSeekerNotInitialized]}
+		return
+	}
 
-		_err := seeker.Seek(inputURL)
+	_err := seeker.Seek(inputURL)
 
-		if _err != nil {
-			err = _err
-			return
-		}
+	if _err != nil {
+		err = _err
+		return
+	}
 
-		if seeker.Logs.ContentLength > v.config.MaxSize {
-			err = &CheckError{CheckErrorMessages[ErrSizeExceeded]}
-			return
-		}
+	if seeker.Logs.ContentLength > v.config.MaxSize {
+		err = &CheckError{CheckErrorMessages[ErrSizeExceeded]}
+		return
+	}
 
-		if seeker.Logs.Redirects != nil && len(*seeker.Logs.Redirects) > v.config.MaxRedirects {
-			err = &CheckError{CheckErrorMessages[ErrMaxRedirectsExceeded]}
-			return
-		}
+	if seeker.Logs.Redirects != nil && len(*seeker.Logs.Redirects) > v.config.MaxRedirects {
+		err = &CheckError{CheckErrorMessages[ErrMaxRedirectsExceeded]}
+		return
+	}
 
-		fmt.Printf("Seeker Took: %v\n", time.Since(seeker.Logs.StartAt))
-		log.Printf("First Byte took: %v\n", seeker.Logs.FirstByteDuration)
-		log.Printf("ValidateURL took: %v\n", seeker.Logs.Duration)
+	log.Printf("Seeker Took: %v\n", time.Since(seeker.Logs.StartAt))
+	log.Printf("First Byte took: %v\n", seeker.Logs.FirstByteDuration)
+	log.Printf("ValidateURL took: %v\n", seeker.Logs.Duration)
 
-		for _, redirect := range *seeker.Logs.Redirects {
-			fmt.Printf("Seeker Redirect: %v\n", redirect.URL)
-		}
+	for _, redirect := range *seeker.Logs.Redirects {
+		log.Printf("Seeker Redirect: %v\n", redirect.URL)
+	}
 
-		if seeker.Logs.Content != nil {
-			fmt.Printf("Seeker Content: %v\n", *seeker.Logs.Content)
-		}
+	if seeker.Logs.Content != nil {
+		log.Printf("Seeker Content: %v\n", *seeker.Logs.Content)
+	}
 
-		if seeker.Logs.ContentType == "" {
-			err = &CheckError{CheckErrorMessages[ErrContentTypeIsEmpty]}
-			return
-		}
+	if seeker.Logs.ContentType == "" {
+		err = &CheckError{CheckErrorMessages[ErrContentTypeIsEmpty]}
+		return
+	}
 
-		// check if the content type include Logs."text/html"
-		if seeker.Config.ContentTypeMustBeHTML && !strings.Contains(seeker.Logs.ContentType, "text/html") {
-			err = &CheckError{CheckErrorMessages[ErrContentTypeNotAllowed]}
-			return
-		}
+	// check if the content type include Logs."text/html"
+	if seeker.Config.ContentTypeMustBeHTML && !strings.Contains(seeker.Logs.ContentType, "text/html") {
+		err = &CheckError{CheckErrorMessages[ErrContentTypeNotAllowed]}
+		return
 	}
 
 	return true, nil
 }
 
 func (v Validator) ValidateOwnershipOverDNSTxtRecord(inputURL string, DNSName string, DNSValue string, DNSServer string) (isValid bool, err error) {
-
 	isValid = false
 
 	if DNSName == "" || DNSValue == "" {
