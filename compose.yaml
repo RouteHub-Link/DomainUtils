@@ -1,0 +1,38 @@
+services:
+  server:
+    build:
+      context: .
+      target: final
+    depends_on:
+      - redis
+    environment:
+      - "task_server.redis_addr=redis:6379"
+      - "hosting_mode=1"
+  receiver:
+    build:
+      context: .
+      target: final
+    depends_on:
+      - server
+    environment:
+      - "port=9001"
+      - "task_server.redis_addr=redis:6379"
+      - "hosting_mode=0"
+    ports:
+      - 9001:9001
+  mon:
+    build:
+      context: .
+      target: final
+    depends_on:
+      - server
+      - receiver
+    environment:
+      - "task_server.monitoring_port=9010"
+      - "task_server.redis_addr=redis:6379"
+      - "hosting_mode=2"
+    ports:
+      - 9010:9010
+  redis:
+    image: redis
+    restart: always

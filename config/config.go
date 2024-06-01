@@ -48,6 +48,7 @@ func GetApplicationConfig() *ApplicationConfig {
 
 		checkRedis()
 
+		log.Printf("Application Config : %+v", _appConfig)
 	})
 
 	return _appConfig
@@ -68,9 +69,16 @@ func loadEnv() {
 	k.Load(env.Provider("", ".", func(s string) string {
 		return s
 	}), nil)
+
+	err := k.Unmarshal("", _appConfig)
+	if err != nil {
+		log.Printf("error unmarshal config: %v", err)
+	}
 }
 
 func checkRedis() {
+	log.Printf("Redis Config : %s", _appConfig.TaskServerConfig.RedisAddr)
+
 	if _appConfig.TaskServerConfig.RedisAddr == "" {
 		log.Fatalf("error loading redis address from config")
 	}
@@ -115,7 +123,8 @@ func parseFlags() {
 		os.Exit(0)
 	}
 
-	f.StringVarP(&_appConfig.Port, "port", "p", _appConfig.Port, "Port to listen on")
+	f.StringVarP(&_appConfig.Port, "receiver port", "p", _appConfig.Port, "Port to listen on")
+	f.StringVarP(&_appConfig.TaskServerConfig.MonitoringPort, "monitoring port", "w", _appConfig.TaskServerConfig.MonitoringPort, "Port to listen on for monitoring dashboard")
 
 	f.BoolVarP(&_appConfig.Health, "health", "h", _appConfig.Health, "Enable health check endpoint")
 
@@ -124,8 +133,11 @@ func parseFlags() {
 	f.BoolVarP(&_appConfig.TaskServerConfig.MonitoringDash, "monitoring-dash", "m", _appConfig.TaskServerConfig.MonitoringDash, "Enable monitoring dashboard")
 
 	var hostingMode int8
-	f.Int8VarP(&hostingMode, "serving-mode", "s", hostingMode, "Serves application as selected mode.\n-s 0 or --serving-mode 0 \n0 : TaskClient\n1 : TaskServer\n2 : TaskMonitoring\nDefault : 0")
+	f.Int8VarP(&hostingMode, "serving-mode", "s", hostingMode, "Serves application as selected mode.\n-s 0 or --serving-mode 0 \n0 : TaskReceiver\n1 : TaskServer\n2 : TaskMonitoring\nDefault : 0")
 
 	f.Parse(os.Args[1:])
-	_appConfig.HostingMode = HostingMode(hostingMode)
+
+	if hostingMode != 0 && _appConfig.HostingMode.Get().Id() != 0 {
+		_appConfig.HostingMode = HostingMode(hostingMode)
+	}
 }
