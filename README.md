@@ -3,7 +3,8 @@
 ![gov120](https://github.com/RouteHub-Link/DomainUtils/assets/16222645/3d751aaa-ad97-45a4-9c89-99521729e44a)
 [![Go Report Card](https://goreportcard.com/badge/github.com/RouteHub-Link/DomainUtils)](https://goreportcard.com/report/github.com/RouteHub-Link/DomainUtils)
 
-<img width="1674" alt="image" src="https://github.com/RouteHub-Link/DomainUtils/assets/16222645/14e6d2e9-a719-4a98-bd89-f3412a24d21d">
+<img width="1490" alt="image" src="https://github.com/RouteHub-Link/DomainUtils/assets/16222645/26482c9c-e0cd-4c71-825d-772d02b96b67">
+
 
 ## Table of Contents
 
@@ -14,10 +15,10 @@
 
 ## About <a name = "about"></a>
 
-This project is a URL Validator Service has three main purposes:
+This project is a Domain utility for validating an site. features are;
 
 1. URL Validation: The service will validate a URL with Configuration options to allow or disallow certain URL patterns.
-2. Seek The URL: The service will seek the URL and return the response status code. With some additional configuration options for more advanced use cases.
+2. Seek The URL: The service will seek the URL and return the response status code. With some additional configuration options for more advanced use cases. (Does not does url validation please validate it first then create a seek task.)
 3. DNS TXT Lookup: The service will perform a DNS TXT lookup on the domain of the URL and return the TXT record.
 
 The service has asynq for queueing the these tasks and a REST API for the client to interact with the service.
@@ -69,7 +70,8 @@ cd DomainUtils
 go build .
 ./DomainUtils --help
 ```
-3. Starting the service.
+
+### 3. Starting the service.
 
 3.1 Stating via Docker
 
@@ -104,27 +106,24 @@ Endpoints and Responses
 - POST /validate/url
 - POST /validate/dns
   - Request
-
-        ```json
-        {
+```json
+    {
         "url": "https://www.google.com"
-        }
-        ```
+    }
+```
 
   - Response
-
-        ```json
-        {
+```json
+    {
         "task_id": "task_id"
-        }
-        ```
+    }
+```
 
 - GET /validate/url/task_id
 - GET /validate/dns/task_id
   - Response
-
-        ```json
-        {
+```json
+    {
         "ID": "732c5e2c-4dec-429a-9613-b1fe6427232b",
         "Queue": "url-validation",
         "Type": "url:validate",
@@ -142,18 +141,20 @@ Endpoints and Responses
         "Retention": 864000000000000,
         "CompletedAt": "2024-05-14T14:17:41+03:00",
         "Result": "base64="
-        }
-        ```
+    }
+```
 
 ### Installing as Validator Package Only
 
+```bash
 - go get github.com/RouteHub-Link/DomainUtils/validator
+```
 
 Note check validator.go for configuration implementation.
 
 ```go
     var _validator = validator.DefaultValidator()
- isValid, err := _validator.ValidateURL(payload.Link)
+    isValid, err := _validator.ValidateURL(payload.Link)
     if err != nil {
         log.Println(err)
     }
@@ -181,6 +182,10 @@ Note check validator.go for configuration implementation.
 
     _validator := validator.NewValidator(customConfig)
     isValid, err := _validator.ValidateURL(payload.Link)
+
+    if isValid {
+    
+    }
 ```
 
 ## Usage <a name = "usage"></a>
