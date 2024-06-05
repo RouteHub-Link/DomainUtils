@@ -62,7 +62,7 @@ func (v Validator) ValidateURL(inputURL string) (isValid bool, err error) {
 		return
 	}
 
-	if v.config.CannotEndWithSlash && strings.HasPrefix(parsedURL.Path, "/") {
+	if v.config.CannotEndWithSlash && strings.HasSuffix(parsedURL.Path, "/") {
 		err = &CheckError{CheckErrorMessages[ErrURLCannotEndWithSlash]}
 		return
 	}
